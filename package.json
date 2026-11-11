@@ -1,0 +1,19 @@
+{
+  "name": "weihua-skill-pipeline",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "一句话创意 → 分析 → 剧本 → 美术提示词 → 美术资产 → 分镜 → 每镜提示词 → 任务包，每个节点的提示词由可替换的技能文件驱动。",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server/index.js",
+    "dev": "node --watch src/server/index.js",
+    "smoke": "node scripts/smoke.js",
+    "preflight": "node scripts/preflight.js",
+    "test:assets": "node scripts/test-assets.js",
+    "validate:ui": "node scripts/validate-ui.js",
+    "validate:matrix": "node scripts/validate-matrix.js"
+  }
+}

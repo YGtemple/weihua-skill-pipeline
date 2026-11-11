@@ -1,0 +1,9 @@
+{
+  "analysis": ["analysis-five-dim"],
+  "script": ["script-three-act"],
+  "artPrompts": ["art-cinematic"],
+  "assets": ["assets-batch-sheet"],
+  "storyboard": ["storyboard-grid"],
+  "shotPrompts": ["shotprompt-shot-level"],
+  "pack": ["pack-delivery"]
+}

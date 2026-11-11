@@ -1,0 +1,24 @@
+{
+  "llm": {
+    "provider": "openai",
+    "mode": "template",
+    "base_url": "",
+    "api_key": "",
+    "model": "",
+    "note": "① 语言模型通道。provider=openai 走 /chat/completions（OpenAI、豆包、通义、DeepSeek 等兼容接口都行）；provider=anthropic 走 /v1/messages。mode=template 时用内置模板引擎，不填 Key 也能把整条流程跑完。base_url 记得带 /v1（Anthropic 可填 https://api.anthropic.com）。"
+  },
+  "image": {
+    "base_url": "https://www.aicost.me/v1",
+    "api_key": "",
+    "model": "gpt-image-2.5-flare",
+    "size": "1536x1024",
+    "note": "② 图片与视频模型通道（图片部分）。OpenAI 兼容 /images/generations 文生图、/images/edits 图生图；参考图只能是 http(s) URL 或 base64 data URI。"
+  },
+  "video": {
+    "mode": "prompt-pack",
+    "base_url": "https://api.tu-zi.com",
+    "api_key": "",
+    "model": "",
+    "note": "② 图片与视频模型通道（视频部分）。prompt-pack 只导出每镜提示词与任务包；填了 base_url 与 model 后，任务包可以直接交给对应视频模型。"
+  }
+}

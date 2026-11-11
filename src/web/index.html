@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>卫华短视频流水线 · 技能工作台</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">卫</span>
+      <div>
+        <h1>卫华短视频流水线 <span class="tag">技能驱动 · 全流程</span></h1>
+        <p>一句话创意 → 分析 → 剧本 → 美术提示词 → 美术资产 → 分镜 → 每镜提示词 → 视频任务包</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-view="demo">工程中心</button>
+      <button class="nav-btn" data-view="workflow">工作流画布</button>
+      <button class="nav-btn" data-view="skills">技能库</button>
+      <button class="nav-btn" data-view="create">一键制作</button>
+      <button class="nav-btn" id="openSettings">接入模型</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 工程中心 -->
+    <section id="view-demo" class="view">
+      <div class="hero card">
+        <div>
+          <h2>内置工程</h2>
+          <p class="muted">五套完整工程已内置：七阶段产物 + 每镜美术首帧 + 真实镜头视频 + 带字幕最终成片。A/C/E 各 7 镜，B/D 各 6 镜，点任意一套即可查看完整流程。</p>
+        </div>
+        <div class="stats" id="stats"></div>
+      </div>
+      <div class="preset-grid" id="presetGrid"></div>
+      <p class="muted foot">真实生成接口全部保留：切换到「一键制作」即可从一句话创意新建矩阵工程并实际调用模型。</p>
+    </section>
+
+    <!-- 工作流画布：从一句话到最终成片 -->
+    <section id="view-workflow" class="view hidden">
+      <div class="view-head"><div><h2>视频创作工作流</h2><p>一句话输入 · 前期拆解 · 七阶段产物 · 最终成片</p></div><button class="btn" id="backDetailBtn">返回工程详情 →</button></div>
+      <div class="card workflow-input-card">
+        <div class="workflow-input-label"><span class="live-dot"></span> 一句话创意</div>
+        <textarea id="wfBrief" rows="2" placeholder="例如：用名场面穿越的方式，让3800吨门机与愚公移山同框"></textarea>
+        <div class="workflow-actions"><select id="wfProject" class="project-select"></select><button class="btn primary" id="wfCreateBtn">创建并一键拆解</button><button class="btn" id="wfDemoBtn">▶ 播放完整流程</button><button class="btn ghost" id="wfFinalBtn">查看最终成片</button></div>
+      </div>
+      <div class="card flow-card">
+        <div class="flow-card-head"><div><strong>创作画布</strong><span id="wfProjectMeta"></span></div><span class="hint">点击节点查看产物 · 内置内容已就绪</span></div>
+        <div class="flow-canvas"><div id="flowNodes" class="flow-nodes"></div></div>
+      </div>
+      <div class="card workflow-detail-card"><div id="wfStageContent"></div></div>
+    </section>
+
+    <!-- 一键制作 -->
+    <section id="view-create" class="view hidden">
+      <div class="create-layout">
+        <aside>
+          <div class="card">
+            <h2>一句话创意</h2>
+            <textarea id="brief" rows="4" placeholder="例如：卫华新中式起重机，较传统起重机高度降低约30%，面向集团领导评审。&#10;每行一个主题，可一次输入多个主题形成矩阵。"></textarea>
+            <div class="grid2">
+              <label>风格<select id="style"><option>工业史诗</option><option>产品科普</option><option>品牌宣言</option><option>名场面穿越</option></select></label>
+              <label>画幅<select id="ratio"><option>16:9</option><option>9:16</option></select></label>
+              <label>目标时长（秒）<input id="durationTarget" type="number" value="40" min="10" max="120" /></label>
+              <label>场景数<input id="sceneCount" type="number" value="6" min="4" max="14" /></label>
+              <label>每主题变体数<input id="variants" type="number" value="1" min="1" max="8" /></label>
+            </div>
+            <button class="btn primary" id="createBtn">创建矩阵工程</button>
+          </div>
+          <div class="card">
+            <div class="row between"><h2>工程矩阵</h2><button class="btn small" id="runAllBtn">批量一键制作</button></div>
+            <div id="projectList" class="project-list"></div>
+          </div>
+        </aside>
+        <div id="createHint" class="empty card">在左侧创建工程，或从下方矩阵选择工程，开始一键式制作。</div>
+      </div>
+    </section>
+
+    <!-- 技能库 -->
+    <section id="view-skills" class="view hidden">
+      <div class="view-head"><div><h2>技能库</h2><p>每个节点挂哪份技能，直接决定这一段的生产提示词。换技能＝换这一段的做法，不需要改代码。</p></div>
+        <div class="row"><button class="btn" id="resetBindingsBtn">恢复默认绑定</button></div></div>
+      <div class="card skill-bind-card">
+        <div class="row between"><h2>节点绑定</h2><span class="muted" id="bindSummary"></span></div>
+        <div id="bindGrid" class="bind-grid"></div>
+      </div>
+      <div class="card skill-upload-card">
+        <h2>上传技能</h2>
+        <p class="muted">技能是纯 Markdown 文件：front matter 写 id / name / node / version，正文分「## 说明」「## 系统提示词」「## 模板」，模板里可用 {{brief}}、{{analysis}}、{{script}} 等占位。同 id 会覆盖原文件。</p>
+        <div class="row">
+          <input type="file" id="skillFile" accept=".md,.markdown,.txt" />
+          <button class="btn" id="openPasteBtn">粘贴 Markdown</button>
+        </div>
+        <div id="pasteWrap" class="hidden">
+          <textarea id="skillMarkdown" rows="10" placeholder="---&#10;id: script-four-beat&#10;name: 剧本 · 四拍&#10;node: script&#10;version: 1.0&#10;---&#10;&#10;## 系统提示词&#10;...&#10;&#10;## 模板&#10;..."></textarea>
+          <button class="btn primary" id="saveSkillBtn">保存技能</button>
+        </div>
+        <p class="muted" id="skillMsg"></p>
+      </div>
+      <div class="card"><div class="row between"><h2>全部技能</h2><span class="muted" id="skillCount"></span></div><div id="skillList" class="skill-list"></div></div>
+    </section>
+
+    <!-- 工程详情 -->
+    <section id="view-detail" class="view hidden">
+      <div class="detail-head card">
+        <div>
+          <button class="link" id="backBtn">← 返回</button>
+          <h2 id="pTitle"></h2>
+          <p class="muted" id="pMeta"></p>
+        </div>
+        <div class="row">
+          <button class="btn" id="workflowBtn">工作流画布</button>
+          <button class="btn primary" id="finalBtn">▶ 最终成片</button>
+          <button class="btn" id="playBtn">连续播放逐镜</button>
+          <button class="btn" id="runBtn">一键跑全流程</button>
+          <button class="btn ghost" id="refreshBtn">刷新</button>
+        </div>
+      </div>
+      <nav class="tabs" id="tabs"></nav>
+      <div id="stageContent" class="card stage-content"></div>
+      <details class="logs card"><summary>执行日志</summary><pre id="logs"></pre></details>
+    </section>
+  </main>
+
+  <!-- 连续播放 -->
+  <div id="player" class="player hidden">
+    <div class="player-box">
+      <div class="row between player-head">
+        <div><b id="plTitle"></b><span class="muted" id="plSub"></span></div>
+        <button class="btn small" id="plClose">退出播放</button>
+      </div>
+      <div class="video-wrap">
+        <video id="plVideo" playsinline autoplay></video>
+        <div class="subtitle" id="plSubtitle"></div>
+      </div>
+      <div class="row between">
+        <span class="muted" id="plNarration"></span>
+        <div class="row"><button class="btn small" id="plPrev">上一镜</button><button class="btn small" id="plNext">下一镜</button></div>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="settings">
+    <h2>接入模型</h2>
+    <p class="muted">密钥只写在本机 config.local.json，已被 gitignore，不会进仓库。填好保存即可用；不填也能用内置模板引擎把整条流程跑完。</p>
+
+    <h3>① 语言模型</h3>
+    <p class="muted small">负责分析、剧本、分镜、提示词这些文字环节。下面两种接口按你手上的 key 选一种。</p>
+    <div class="grid2">
+      <label>接口类型<select id="llmProvider">
+        <option value="openai">OpenAI 兼容（/chat/completions）</option>
+        <option value="anthropic">Anthropic（/v1/messages）</option>
+      </select></label>
+      <label>是否启用<select id="llmMode"><option value="template">先用模板引擎</option><option value="openai">接入语言模型</option></select></label>
+      <label>Base URL<input id="llmBase" placeholder="openai: https://api.openai.com/v1｜anthropic: https://api.anthropic.com" /></label>
+      <label>模型<input id="llmModel" placeholder="如 gpt-4o-mini / claude-sonnet-4-5 / 豆包、通义兼容模型名" /></label>
+      <label>API Key<input id="llmKey" type="password" placeholder="留空表示不修改" /></label>
+    </div>
+    <div class="row"><button class="btn small" id="testLlm">测试语言模型</button><button class="btn small ghost" id="presetOpenai">填 OpenAI 默认</button><button class="btn small ghost" id="presetAnthropic">填 Anthropic 默认</button></div>
+
+    <h3>② 图片与视频模型</h3>
+    <p class="muted small">负责美术资产与逐镜视频。图片走 OpenAI 兼容的 /images 接口；视频默认只导出任务包，任务包可以直接交给任意视频模型。</p>
+    <div class="grid2">
+      <label>图片 Base URL<input id="imgBase" placeholder="https://.../v1" /></label>
+      <label>图片模型<input id="imgModel" /></label>
+      <label>图片 API Key<input id="imgKey" type="password" placeholder="留空表示不修改" /></label>
+      <label>默认尺寸<input id="imgSize" /></label>
+      <label>视频 Base URL<input id="videoBase" /></label>
+      <label>视频模型<input id="videoModel" placeholder="留空则只导出任务包" /></label>
+      <label>视频模式<select id="videoMode"><option value="prompt-pack">只导出提示词 + 任务包</option></select></label>
+    </div>
+    <div class="row"><button class="btn small" id="testImg">测试图片通道</button></div>
+
+    <div class="row end"><span id="settingsMsg" class="muted"></span>
+      <button class="btn primary" id="saveSettings">保存</button>
+      <button class="btn ghost" id="closeSettings">关闭</button>
+    </div>
+  </dialog>
+  <script src="/app.js"></script>
+</body>
+</html>
